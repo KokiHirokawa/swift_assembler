@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		069E41162240DC5600C2CB01 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E41152240DC5600C2CB01 /* main.swift */; };
+		069E411D2240E35900C2CB01 /* code.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E411C2240E35900C2CB01 /* code.swift */; };
+		069E411F2240E37200C2CB01 /* parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E411E2240E37200C2CB01 /* parser.swift */; };
+		069E4121224146D400C2CB01 /* symbol_table.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E4120224146D400C2CB01 /* symbol_table.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +28,9 @@
 /* Begin PBXFileReference section */
 		069E41122240DC5600C2CB01 /* Assembler */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Assembler; sourceTree = BUILT_PRODUCTS_DIR; };
 		069E41152240DC5600C2CB01 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		069E411C2240E35900C2CB01 /* code.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = code.swift; sourceTree = "<group>"; };
+		069E411E2240E37200C2CB01 /* parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = parser.swift; sourceTree = "<group>"; };
+		069E4120224146D400C2CB01 /* symbol_table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = symbol_table.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +64,9 @@
 			isa = PBXGroup;
 			children = (
 				069E41152240DC5600C2CB01 /* main.swift */,
+				069E411C2240E35900C2CB01 /* code.swift */,
+				069E411E2240E37200C2CB01 /* parser.swift */,
+				069E4120224146D400C2CB01 /* symbol_table.swift */,
 			);
 			path = Assembler;
 			sourceTree = "<group>";
@@ -119,6 +128,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				069E411F2240E37200C2CB01 /* parser.swift in Sources */,
+				069E411D2240E35900C2CB01 /* code.swift in Sources */,
+				069E4121224146D400C2CB01 /* symbol_table.swift in Sources */,
 				069E41162240DC5600C2CB01 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
