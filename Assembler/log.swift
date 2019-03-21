@@ -23,15 +23,14 @@ class Log {
     
     private func add(_ text: String) {
         log += text
-        log += "\n"
     }
     
-    func output() {
+    func output(filename: String) {
         let data = log.data(using: .utf8)
         let fileManager = FileManager.default
-        guard fileManager.createFile(atPath: "./output.log", contents: data) else {
+        guard fileManager.createFile(atPath: "\(filename).log", contents: data) else {
             return
         }
-        print("log -> output.log")
+        print("log -> \(filename).log")
     }
 }

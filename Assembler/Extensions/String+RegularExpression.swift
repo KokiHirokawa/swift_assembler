@@ -12,13 +12,13 @@ extension String {
  
     func isMatch(pattern: String) -> Bool {
         guard let regExp = try? NSRegularExpression(pattern: pattern) else { return false }
-        let count = regExp.numberOfMatches(in: self, options: [], range: NSMakeRange(0, self.count))
+        let count = regExp.numberOfMatches(in: self, range: NSMakeRange(0, self.count))
         return count != 0
     }
     
     func firstMatch(pattern: String) -> NSTextCheckingResult? {
         guard let regExp = try? NSRegularExpression(pattern: pattern) else { return nil }
-        let matche = regExp.firstMatch(in: self, options: [], range: NSMakeRange(0, self.count))
+        let matche = regExp.firstMatch(in: self, range: NSMakeRange(0, self.count))
         return matche
     }
 }

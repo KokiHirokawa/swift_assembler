@@ -21,8 +21,16 @@ func main(_ arguments: [String]) {
         return
     }
     
-    let path = arguments[1]
-    _ = Parser.init(path)
+    let filePath = arguments[1]
+    let parser = Parser.init(path: filePath)
+    parser.advance()
+    
+    let FILE_PATH_PATTERN = "([\\w\\.\\$\\~:/]+)\\.asm$"
+    guard let pathMatch = filePath.firstMatch(pattern: FILE_PATH_PATTERN), let filenameRange = pathMatch[1] else {
+        print("please pass *.asm file.")
+        return
+    }
+    parser.output(filename: filePath[filenameRange])
 }
 
 main(CommandLine.arguments)
