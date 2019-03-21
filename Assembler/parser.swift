@@ -12,14 +12,17 @@ class Parser {
     
     let fileManager = FileManager.default
     
-    let A_COMMAND_PATTERN = "@([0-9a-zA-Z_\\.\\$:]+)"
+    let A_COMMAND_PATTERN = "@(\\d+)|([\\w\\.\\$:]+)"
     let C_COMMAND_PATTERN = "(?:(A?M?D?)=)?([^;]+)(?:;(.+))?"
-    let L_COMMAND_PATTERN = "\\(([0-9a-zA-Z_\\.\\$:]*)\\)"
-    
-    let FILE_PATH_PATTERN = "([0-9a-zA-Z]+)\\.asm$"
+    let L_COMMAND_PATTERN = "\\(([\\w\\.\\$:]+)\\)"
+    let COMMENT_OUT_PATTERN = "^/{2}"
+    let FILE_PATH_PATTERN = "([\\w\\.\\$:]+)\\.asm$"
     
     var instruction: String!
     var result: String = ""
+    
+    let symbolTable = SymbolTable()
+    let log = Log()
     
     init(_ path: String) {
         
@@ -37,42 +40,73 @@ class Parser {
                 return
         }
         
+        var lineCount = 1
+        
         for line in contents.components(separatedBy: .newlines) {
-            
             instruction = line.trimmingCharacters(in: .whitespaces)
             if instruction.isEmpty { continue }
-            if isMatch(pattern: "^/{2}") { continue }
+            if isMatch(pattern: COMMENT_OUT_PATTERN) { continue }
             
             let type = commandType()
             switch type {
             case .a:
+                let match = instruction.firstMatch(pattern: A_COMMAND_PATTERN)
+                guard let range = match?.range(at: 2) else { continue }
+                let symbol = instruction[range]
+                symbolTable.addVariable(symbol: symbol)
+            case .c:
+                break
+            case .l:
+                let match = instruction.firstMatch(pattern: L_COMMAND_PATTERN)
+                guard let range = match?.range(at: 1) else { continue }
+                let symbol = instruction[range]
+                guard let address = lineCount.format(radix: 2, length: 16) else { continue }
+                symbolTable.addEntry(symbol: symbol, address: address)
+            }
+            
+            lineCount += 1
+        }
+        
+        lineCount = 0
+        
+        for line in contents.components(separatedBy: .newlines) {
+            
+            instruction = line.trimmingCharacters(in: .whitespaces)
+            if instruction.isEmpty { continue }
+            if isMatch(pattern: COMMENT_OUT_PATTERN) { continue }
+            
+            let type = commandType()
+            var output = ""
+            switch type {
+            case .a:
                 let match = firstMatch(pattern: A_COMMAND_PATTERN)
-                let range = match?.range(at: 1)
-                let value = instruction[range!]
-                result += formatBinary(Int(value)!, figureLength: 16)
-                result += "\n"
+                if let symbolRange = match?.range(at: 2) {
+                    let symbol = instruction[symbolRange]
+                    let value = symbolTable.getAddress(symbol: symbol)
+                    output += value
+                } else if let addressRange = match?.range(at: 1) {
+                    let value = instruction[addressRange]
+                    output += Int(value)?.format(radix: 2, length: 16) ?? ""
+                }
             case .c:
                 let destCode = Code.dest(dest())
                 let compCode = Code.comp(comp())
                 let jumpCode = Code.jump(jump())
-                result += "111\(formatBinary(destCode, figureLength: 3))\(formatBinary(compCode, figureLength: 7))\(formatBinary(jumpCode, figureLength: 3))"
-                result += "\n"
+                output += "111\(destCode)\(compCode)\(jumpCode)"
             case .l:
                 print("L")
             }
+            
+            lineCount += 1
+            log.addLog(lineCount: lineCount, instruction: instruction, type: type, output: output)
+            output += "\n"
+            result += output
         }
         
         let resultData = result.data(using: .ascii)
         fileManager.createFile(atPath: "./\(filename).hack", contents: resultData, attributes: nil)
-    }
-    
-    func formatBinary(_ val: Int, figureLength: Int) -> String {
-        var binary = String(val, radix: 2)
-        let count = binary.count
-        for _ in 0..<figureLength-count {
-            binary.insert("0", at: binary.startIndex)
-        }
-        return binary
+        
+        log.output()
     }
     
     func hasMoreCommands() -> Bool {
@@ -123,37 +157,6 @@ class Parser {
     func firstMatch(pattern: String) -> NSTextCheckingResult? {
         guard let regExp = try? NSRegularExpression(pattern: pattern) else { return nil }
         let matche = regExp.firstMatch(in: instruction, options: [], range: NSMakeRange(0, instruction.count))
-        return matche
-    }
-}
-
-enum CommandType {
-    case a
-    case c
-    case l
-}
-
-extension String {
-    
-    subscript(range: NSRange) -> String {
-        if range.lowerBound == NSNotFound {
-            return ""
-        }
-        
-        let nsString = self as NSString
-        let subString = nsString.substring(with: range)
-        return String(subString)
-    }
-    
-    func isMatch(pattern: String) -> Bool {
-        guard let regExp = try? NSRegularExpression(pattern: pattern) else { return false }
-        let count = regExp.numberOfMatches(in: self, options: [], range: NSMakeRange(0, self.count))
-        return count != 0
-    }
-    
-    func firstMatch(pattern: String) -> NSTextCheckingResult? {
-        guard let regExp = try? NSRegularExpression(pattern: pattern) else { return nil }
-        let matche = regExp.firstMatch(in: self, options: [], range: NSMakeRange(0, self.count))
         return matche
     }
 }
