@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Code {
+struct Code {
     
     private static let compDict: [String: String] = [
         "0":   "0101010",

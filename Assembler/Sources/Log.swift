@@ -10,11 +10,7 @@ import Foundation
 
 class Log {
     
-    var log: String
-    
-    init() {
-        log = ""
-    }
+    var log: String = ""
     
     func addLog(lineCount: Int, instruction: String, type: CommandType, output: String) {
         let line = "\(lineCount) \(instruction) type=\(type.rawValue) output=\(output)"

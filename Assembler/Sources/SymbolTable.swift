@@ -9,8 +9,9 @@
 import Foundation
 
 class SymbolTable {
-    
-    var symbols: [String: String] = [
+
+    private var nextAddress = 16
+    private var symbols: [String: String] = [
         "SP":     "0000000000000000",
         "LCL":    "0000000000000001",
         "ARG":    "0000000000000010",
@@ -36,8 +37,6 @@ class SymbolTable {
         "KBD":    "0110000000000000"
     ]
     
-    var nextAddress = 16
-    
     func addEntry(symbol key: String, address: String) {
         symbols[key] = address
     }
@@ -55,20 +54,5 @@ class SymbolTable {
     
     func getAddress(symbol key: String) -> String {
         return symbols[key] ?? ""
-    }
-}
-
-extension Int {
-    
-    func format(radix: Int, length: Int) -> String? {
-        
-        var output = String(self, radix: radix)
-        let addCount = length - output.count
-        guard addCount > 0 else { return nil }
-        
-        for _ in 0..<length-output.count {
-            output.insert("0", at: output.startIndex)
-        }
-        return output
     }
 }

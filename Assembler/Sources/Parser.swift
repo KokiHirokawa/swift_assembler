@@ -10,14 +10,11 @@ import Foundation
 
 class Parser {
     
-    let A_COMMAND_PATTERN = "@((\\d+)|([\\w\\.\\$:]+))"
-    let C_COMMAND_PATTERN = "(?:(A?M?D?)=)?([^;]+)(?:;(.+))?"
-    let L_COMMAND_PATTERN = "\\(([\\w\\.\\$:]+)\\)"
-    let COMMENT_OUT_PATTERN = "/{2}.*"
-    
     let fileManager = FileManager.default
     let symbolTable = SymbolTable()
     let log = Log()
+    
+    var filename: String = ""
     
     var inputCode: String = ""
     var outputCode: String = ""
@@ -32,6 +29,12 @@ class Parser {
         }
         
         self.inputCode = inputCode
+        
+        guard let pathMatch = path.firstMatch(pattern: RegExpPattern.FILE_PATH_PATTERN), let filenameRange = pathMatch[1] else {
+            print("please pass *.asm file.")
+            return
+        }
+        filename = path[filenameRange]
     }
     
     func advance() {
@@ -41,7 +44,7 @@ class Parser {
             
             instruction = line
             
-            let regExp = try! NSRegularExpression(pattern: COMMENT_OUT_PATTERN)
+            let regExp = try! NSRegularExpression(pattern: RegExpPattern.COMMENT_OUT_PATTERN)
             instruction = regExp.stringByReplacingMatches(in: instruction, range: NSMakeRange(0, instruction.count), withTemplate: "")
             instruction = instruction.trimmingCharacters(in: .whitespaces)
             
@@ -64,7 +67,7 @@ class Parser {
             
             instruction = line
             
-            let regExp = try! NSRegularExpression(pattern: COMMENT_OUT_PATTERN)
+            let regExp = try! NSRegularExpression(pattern: RegExpPattern.COMMENT_OUT_PATTERN)
             instruction = regExp.stringByReplacingMatches(in: instruction, range: NSMakeRange(0, instruction.count), withTemplate: "")
             instruction = instruction.trimmingCharacters(in: .whitespaces)
             
@@ -74,7 +77,7 @@ class Parser {
             var output = ""
             switch type {
             case .a:
-                guard let match = instruction.firstMatch(pattern: A_COMMAND_PATTERN) else { continue }
+                guard let match = instruction.firstMatch(pattern: RegExpPattern.A_COMMAND_PATTERN) else { continue }
                 
                 if let addressRange = match[2] {
                     let value = instruction[addressRange]
@@ -106,24 +109,24 @@ class Parser {
         }
     }
     
-    func output(filename: String) {
+    func output() {
         let data = outputCode.data(using: .ascii)
         fileManager.createFile(atPath: "\(filename).hack", contents: data)
         
         log.output(filename: filename)
     }
     
-    func commandType() -> CommandType {
-        if let _ = instruction.firstMatch(pattern: L_COMMAND_PATTERN) {
+    private func commandType() -> CommandType {
+        if let _ = instruction.firstMatch(pattern: RegExpPattern.L_COMMAND_PATTERN) {
             return .l
-        } else if let _ = instruction.firstMatch(pattern: A_COMMAND_PATTERN) {
+        } else if let _ = instruction.firstMatch(pattern: RegExpPattern.A_COMMAND_PATTERN) {
             return .a
         } else {
             return .c
         }
     }
     
-    func symbol(_ type: CommandType) -> String {
+    private func symbol(_ type: CommandType) -> String {
         switch type {
         case .a:
             return instruction[NSMakeRange(1, instruction.count - 1)]
@@ -134,20 +137,20 @@ class Parser {
         }
     }
     
-    func dest() -> String {
-        let match = instruction.firstMatch(pattern: C_COMMAND_PATTERN)
+    private func dest() -> String {
+        let match = instruction.firstMatch(pattern: RegExpPattern.C_COMMAND_PATTERN)
         let range = match?.range(at: 1)
         return instruction[range!]
     }
     
-    func comp() -> String {
-        let match = instruction.firstMatch(pattern: C_COMMAND_PATTERN)
+    private func comp() -> String {
+        let match = instruction.firstMatch(pattern: RegExpPattern.C_COMMAND_PATTERN)
         let range = match?.range(at: 2)
         return instruction[range!]
     }
     
-    func jump() -> String {
-        let match = instruction.firstMatch(pattern: C_COMMAND_PATTERN)
+    private func jump() -> String {
+        let match = instruction.firstMatch(pattern: RegExpPattern.C_COMMAND_PATTERN)
         let range = match?.range(at: 3)
         return instruction[range!]
     }

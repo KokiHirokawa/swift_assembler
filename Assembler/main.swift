@@ -8,29 +8,24 @@
 
 import Foundation
 
-func main(_ arguments: [String]) {
+func run() {
     
     guard #available(macOS 10.12, *) else {
         print("The current environment is not macOS 10.12 or newer.")
         return
     }
     
-    if CommandLine.argc < 2 {
-        print("No arguments are passed.")
+    guard CommandLine.argc == 2 else {
         print("usage: ./assembler FILEPATH")
         return
     }
     
-    let filePath = arguments[1]
+    let args = CommandLine.arguments
+    let filePath = args[1]
+    
     let parser = Parser.init(path: filePath)
     parser.advance()
-    
-    let FILE_PATH_PATTERN = "([\\w\\.\\$\\~:/]+)\\.asm$"
-    guard let pathMatch = filePath.firstMatch(pattern: FILE_PATH_PATTERN), let filenameRange = pathMatch[1] else {
-        print("please pass *.asm file.")
-        return
-    }
-    parser.output(filename: filePath[filenameRange])
+    parser.output()
 }
 
-main(CommandLine.arguments)
+run()
